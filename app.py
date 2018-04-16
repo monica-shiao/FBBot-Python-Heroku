@@ -3,8 +3,7 @@ import json
 from flask import Flask, request
 from pymessager.message import Messager
 from utils.config import *
-import apiai
-from config import DIALOGFLOW_TOKEN
+
 
 app = Flask(__name__)
 
@@ -21,19 +20,6 @@ def fb_webhook():
 
 # Receive the message
 @app.route('/', methods=['POST'])
-def dialogflowResponse(text):
-    ai = apiai.ApiAI(DIALOGFLOW_TOKEN)
-    request = ai.text_request()
-    request.lang = 'zh-TW'
-    #request.session_id = "<SESSION ID, UNIQUE FOR EACH USER>"
-    request.query = text
-    response = request.getresponse()
-    res = response.read().decode('utf8').replace('\n', '').replace(' ', '')
-    res = json.loads(res)
-    return res
-
-
-'''
 def fb_receive_message():
     message_entries = json.loads(request.data.decode('utf8'))['entry']
     for entry in message_entries:
@@ -43,6 +29,6 @@ def fb_receive_message():
             if message.get('message'):
                 client.send_text(recipient_id, message['message']['text'])
     return "Message Processed"
-'''
+
 if __name__ == '__main__':
     app.run(host=SERVER_HOST, port=SERVER_PORT)
