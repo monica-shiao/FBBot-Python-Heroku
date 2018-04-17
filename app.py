@@ -49,7 +49,7 @@ def handle_message():
                 if messaging_event.get("message"):
                     sender_id = messaging_event["sender"]["id"]
                     message_text = messaging_event["message"]["text"]
-                    send_response(sender_id, parse_user_message(message_text))
+                    send_response(sender_id, parse_user_text(message_text))
     return "ok"
 
 
