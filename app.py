@@ -43,12 +43,15 @@ def handle_message():
         Handle messages sent by facebook messenger to the applicaiton
         '''
     data = request.get_json()
+    print("data" + data)
     if data["object"] == "page":
+        print("input the page")
         for entry in data["entry"]:
             for messaging_event in entry["messaging"]:
                 if messaging_event.get("message"):
                     sender_id = messaging_event["sender"]["id"]
                     message_text = messaging_event["message"]["text"]
+                    print("The message_text is " + message_text)
                     send_response(sender_id, parse_user_text(message_text))
     return "ok"
 
@@ -62,6 +65,7 @@ def parse_user_text(user_text):
     request.query = user_text
     response = json.loads(request.getresponse().read().decode('utf-8'))
     responseStatus = response['status']['code']
+    print("responseStatus is : " + responseStatus)
     if (responseStatus == 200):
         print("API AI response", response['result']['fulfillment']['speech'])
     else:
