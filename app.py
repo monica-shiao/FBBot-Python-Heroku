@@ -21,7 +21,7 @@ def fb_webhook():
     else:
         return '200'
 
-
+'''
 # Receive the message
 @app.route('/', methods=['POST'])
 def fb_receive_message():
@@ -47,24 +47,10 @@ def handle_message():
         for entry in data["entry"]:
             for messaging_event in entry["messaging"]:
                 if messaging_event.get("message"):
-                    
                     sender_id = messaging_event["sender"]["id"]
                     message_text = messaging_event["message"]["text"]
                     send_response(sender_id, parse_user_message(message_text))
-
     return "ok"
-'''
-
-def send_response(sender_id, message_text):
-    url = "https://graph.facebook.com/v2.6/me/messages"
-    params = {'access_token': ACCESS_TOKEN}
-    headers = {'Content-Type': 'application/json'}
-    data = {
-        'recipient': {'id': sender_id},
-        'message': {'text': message_text}
-    }
-    response = requests.post(url, params=params, headers=headers,json=data)
-    return response
 
 
 def parse_user_text(user_text):
@@ -80,6 +66,19 @@ def parse_user_text(user_text):
         print("API AI response", response['result']['fulfillment']['speech'])
     else:
         return ("Sorry, I couldn't understand that question")
+
+
+def send_response(sender_id, message_text):
+    url = "https://graph.facebook.com/v2.6/me/messages"
+    params = {'access_token': ACCESS_TOKEN}
+    headers = {'Content-Type': 'application/json'}
+    data = {
+        'recipient': {'id': sender_id},
+        'message': {'text': message_text}
+    }
+    response = requests.post(url, params=params, headers=headers,json=data)
+    return response
+
 
 '''
 
@@ -107,5 +106,6 @@ def fb_receive_message():
                 client.send_text(recipient_id, message['message']['text'])
     return "Message Processed"
 '''
+
 if __name__ == '__main__':
     app.run(host=SERVER_HOST, port=SERVER_PORT)
