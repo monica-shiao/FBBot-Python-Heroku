@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 import json
 from flask import Flask, request
-from pymessager.message import Messager
+from pymessager.message import Messager, QuickReply
 from utils.config import *
-import apiai
-
-ai = apiai.ApiAI(DIALOGFLOW_TOKEN)
-
+from utils.dialogflow import *
 
 app = Flask(__name__)
 
@@ -21,95 +18,61 @@ def fb_webhook():
     else:
         return '200'
 
-'''
 # Receive the message
 @app.route('/', methods=['POST'])
 def fb_receive_message():
     message_entries = json.loads(request.data.decode('utf8'))['entry']
     for entry in message_entries:
-        print(entry)
+        #print(entry)
         for message in entry['messaging']:
             recipient_id = message['sender']['id']
             if message.get('message'):
-                send_response(recipient_id, parse_user_message(message_text))
-                # client.send_text(recipient_id, parse_user_message(message_text))
+                client.send_quick_replies(recipient_id, "House",
+                                          [QuickReply("Get Recommend", "Hello world"),
+                                           QuickReply("House Detail","House Detail")])
+                #res = getRecommend()
+                # client.send_text(recipient_id, res['city'])
+                #res = dialogflowResponse(message['message']['text'])
+                #client.send_text(recipient_id, res['result']['fulfillment']['speech'])
     return "Message Processed"
 
-'''
 
-@app.route('/', methods=['POST'])
-def handle_message():
-    '''
-        Handle messages sent by facebook messenger to the applicaiton
-        '''
-    data = request.get_json()
-    print("data" + data)
-    if data["object"] == "page":
-        print("input the page")
-        for entry in data["entry"]:
-            for messaging_event in entry["messaging"]:
-                if messaging_event.get("message"):
-                    sender_id = messaging_event["sender"]["id"]
-                    message_text = messaging_event["message"]["text"]
-                    print("The message_text is " + message_text)
-                    send_response(sender_id, parse_user_text(message_text))
-    return "ok"
-
-
-def parse_user_text(user_text):
-    '''
-        Send the message to API AI which invokes an intent
-        and sends the response accordingly
-        '''
-    request = ai.text_request()
-    request.query = user_text
-    response = json.loads(request.getresponse().read().decode('utf-8'))
-    responseStatus = response['status']['code']
-    print("responseStatus is : " + responseStatus)
-    if (responseStatus == 200):
-        print("API AI response", response['result']['fulfillment']['speech'])
-    else:
-        return ("Sorry, I couldn't understand that question")
-
-
-def send_response(sender_id, message_text):
-    url = "https://graph.facebook.com/v2.6/me/messages"
-    params = {'access_token': ACCESS_TOKEN}
-    headers = {'Content-Type': 'application/json'}
-    data = {
-        'recipient': {'id': sender_id},
-        'message': {'text': message_text}
+#@app.route('/recommend', methods=['POST'])
+def getRecommend():
+    query = {
+        'userid': '1835096909836936',
+        'searchType': 'sale',
+        'orderBy': 'score',
+        'position': 'selected',
+        'order': '1',
+        'lat': '0',
+        'lng': '0',
+        'city': '臺北市',
+        'area': '中正區',
+        'minBuy': '0',
+        'maxBuy': '999',
+        'minRent': '1',
+        'maxRent': '99999',
+        'house': '1',
+        'function': '1',
+        'environment': '1'
     }
-    response = requests.post(url, params=params, headers=headers,json=data)
-    return response
+    '''
+    if query['order'] not in ['0', '1']:
+        return "wrong by order"
+    
+    if query['searchType'] not in ['sale', 'rent']:
+        return "wrong by searchType"
+    
+    if query['orderBy'] not in ['price', 'score']:
+        return "wrong by orderBy"
+    
+    if query['position'] not in ['user', 'selected']:
+        return "wrong by position"
+    '''
+    #print(json.dumps(query, indent = 4))
+    return query
 
-
-'''
-
-def parse_natural_event(self, event, session_id, contexts):
-    e = apiai.events.Event(event)
-    request = ai.event_request(e)
-    request.session_id = session_id  # unique for each user
-    request.contexts = contexts    # a list
-    response = json.loads(request.getresponse().read().decode(‘utf-8’))
-    return response
-
-
-
-
-
-# Receive the message
-@app.route('/', methods=['POST'])
-def fb_receive_message():
-    message_entries = json.loads(request.data.decode('utf8'))['entry']
-    for entry in message_entries:
-        print(entry)
-        for message in entry['messaging']:
-            recipient_id = message['sender']['id']
-            if message.get('message'):
-                client.send_text(recipient_id, message['message']['text'])
-    return "Message Processed"
-'''
 
 if __name__ == '__main__':
     app.run(host=SERVER_HOST, port=SERVER_PORT)
