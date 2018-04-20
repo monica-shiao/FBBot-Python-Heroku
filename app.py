@@ -1,78 +1,60 @@
-# -*- coding: utf-8 -*-
-import json
+#Python libraries that we need to import for our bot
+import random
 from flask import Flask, request
-from pymessager.message import Messager, QuickReply
-from utils.config import *
-from utils.dialogflow import *
+from pymessenger.bot import Bot
+from src.config import *
 
 app = Flask(__name__)
 
-client = Messager(ACCESS_TOKEN)
+bot = Bot(ACCESS_TOKEN)
 
-# Verify & confirms all requests can sent to bot.
-@app.route('/', methods=['GET'])
-def fb_webhook():
-    verify_token = request.args.get('hub.verify_token')
-    if verify_token == VERIFY_TOKEN:
-        return request.args.get('hub.challenge')
+#We will receive messages that Facebook sends our bot at this endpoint
+@app.route("/", methods=['GET', 'POST'])
+def receive_message():
+    if request.method == 'GET':
+        """Before allowing people to message your bot, Facebook has implemented a verify token
+            that confirms all requests that your bot receives came from Facebook."""
+        token_sent = request.args.get("hub.verify_token")
+        return verify_fb_token(token_sent)
+    #if the request was not get, it must be POST and we can just proceed with sending a message back to user
     else:
-        return '200'
-
-# Receive the message
-@app.route('/', methods=['POST'])
-def fb_receive_message():
-    message_entries = json.loads(request.data.decode('utf8'))['entry']
-    for entry in message_entries:
-        #print(entry)
-        for message in entry['messaging']:
-            recipient_id = message['sender']['id']
-            if message.get('message'):
-                client.send_quick_replies(recipient_id, "House",
-                                          [QuickReply("Get Recommend", "Hello world"),
-                                           QuickReply("House Detail","House Detail")])
-                #res = getRecommend()
-                # client.send_text(recipient_id, res['city'])
-                #res = dialogflowResponse(message['message']['text'])
-                #client.send_text(recipient_id, res['result']['fulfillment']['speech'])
+        # get whatever message a user sent the bot
+        output = request.get_json()
+        for event in output['entry']:
+            messaging = event['messaging']
+            for message in messaging:
+                if message.get('message'):
+                    #Facebook Messenger ID for user so we know where to send response back to
+                    recipient_id = message['sender']['id']
+                    if message['message'].get('text'):
+                        response_sent_text = get_message()
+                        send_message(recipient_id, response_sent_text)
+                    #if user sends us a GIF, photo,video, or any other non-text item
+                    if message['message'].get('attachments'):
+                        response_sent_nontext = get_message()
+                        send_message(recipient_id, response_sent_nontext)
     return "Message Processed"
 
 
-#@app.route('/recommend', methods=['POST'])
-def getRecommend():
-    query = {
-        'userid': '1835096909836936',
-        'searchType': 'sale',
-        'orderBy': 'score',
-        'position': 'selected',
-        'order': '1',
-        'lat': '0',
-        'lng': '0',
-        'city': '臺北市',
-        'area': '中正區',
-        'minBuy': '0',
-        'maxBuy': '999',
-        'minRent': '1',
-        'maxRent': '99999',
-        'house': '1',
-        'function': '1',
-        'environment': '1'
-    }
-    '''
-    if query['order'] not in ['0', '1']:
-        return "wrong by order"
-    
-    if query['searchType'] not in ['sale', 'rent']:
-        return "wrong by searchType"
-    
-    if query['orderBy'] not in ['price', 'score']:
-        return "wrong by orderBy"
-    
-    if query['position'] not in ['user', 'selected']:
-        return "wrong by position"
-    '''
-    #print(json.dumps(query, indent = 4))
-    return query
+def verify_fb_token(token_sent):
+    #take token sent by facebook and verify it matches the verify token you sent
+    #if they match, allow the request, else return an error
+    if token_sent == VERIFY_TOKEN:
+        return request.args.get("hub.challenge")
+    return 'Invalid verification token'
 
 
-if __name__ == '__main__':
+#chooses a random message to send to the user
+def get_message():
+    sample_responses = ["Hello World!", "Nice to meet you.", "Love you~", "Have a great day~"]
+    # return selected item to the user
+    return random.choice(sample_responses)
+
+#uses PyMessenger to send response to user
+def send_message(recipient_id, response):
+    #sends user the text message provided via input response parameter
+    bot.send_text_message(recipient_id, response)
+    return "success"
+
+if __name__ == "__main__":
     app.run(host=SERVER_HOST, port=SERVER_PORT)
