@@ -1,3 +1,4 @@
 git+https://github.com/TheoKlein/PyMessager@master#egg=pymessager
 flask
 apiai
+gunicorn==19.6.0
