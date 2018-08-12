@@ -110,7 +110,6 @@ def createFavorite():
 def displayHouse(client, sender_id, rec_query):
     client.send_text(sender_id, "Please wait...")
     rec_query['userid'] = sender_id
-    print('rec_query is : ' + str(rec_query))
 
     res = requests.post(recommend, data=rec_query)
     response_data = res.json()
@@ -152,25 +151,45 @@ def displayDetail(client, sender_id, detail_query):
     res = requests.post(houseDetail, data=detail_query)
     houseDetails = res.json()
     details = houseDetails["result"]
-
-    response_message = details["title"] + "\n格局：" + details["pattern"] + "\n地址：" + details["address"] 
     
-    if details["type"] == 'rent':
-        response_message += "\n販售類型：租屋\n租金：" + str(details["price"]) + "元\n"
-    else:
-        response_message += "\n販售類型：買屋\n售價：" + str(details["price"]) + "萬元\n"
-    
-    if details["is_favorite"]:
-        response_message += "已加入我的最愛❤️\n\n"
-    
-    response_message += "分數：\n    總分：" + star(details["score"]["_final"]) + "\n    環境分數：" + star(details["score"]["environment"]) + "\n    機能分數：" + star(details["score"]["function"]) + "\n    房屋分數：" + star(details["score"]["house"]) + "\n\n機能評判：\n\n☑️" + details["describe"]["consumption"] + "☑️學校：" + details["describe"]["school"] + "☑️交通：" + details["describe"]["transportation"]
-    
+    describe_message = ''
     for element in houseDescribe:
         if details["describe"][element]["status"]:
-            response_message += "☑️" + details["describe"][element]["result"]
+            describe_message += "☑️" + details["describe"][element]["result"]
 
+    response_message = """{title}
+格局：{pattern}
+地址：{address}
+販售類型：{type}
+{price_type}：{price}{price_unit}{favorite}
 
-    response_message += "\n網頁介紹：" + details["link"] + "\n資料來源：" + details["source"]
+分數：
+\t總分：{final}
+\t環境分數：{env}
+\t機能分數：{function}
+\t房屋分數：{house}
+
+機能評判：
+
+☑️{consumption}☑️學校：{school}☑️交通：{transportation}{describe}
+網頁介紹：{link}
+資料來源：{source}""".format(
+        title=details['title'], pattern=details["pattern"], address=details["address"],
+        type='租屋' if details['type']=='rent' else '買屋',
+        price_type='租金' if details['type']=='rent' else '售價',
+        price=str(details["price"]), price_unit='元' if details['type']=='rent' else '萬元',
+        favorite='\n已加入我的最愛❤️' if details['is_favorite'] == 1 else "",
+        final=star(details["score"]["_final"]),
+        env=star(details["score"]["environment"]),
+        function=star(details["score"]["function"]),
+        house=star(details["score"]["house"]),
+        consumption=details["describe"]["consumption"],
+        school=details["describe"]["school"],
+        transportation=details["describe"]["transportation"],
+        describe=describe_message,
+        link=details["link"],
+        source=details["source"]
+    )
 
     client.send_text(sender_id, response_message)
 
