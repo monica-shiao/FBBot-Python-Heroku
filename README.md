@@ -1,94 +1,60 @@
-# 製作 Facebook Messenger Bots 教學（使用ngrok）
-Building Facebook Messenger Bots with Python and ngrok
-
+# Facebook Messenger Bots (Heroku 設定)
+Building Facebook Messenger Bots with Python and heroku
 
 ## Development Environment Setup
+### Tools：
+- Language：Python3
+- framework：Flask
+- Server platform：[Heroku](https://dashboard.heroku.com/)
+- [Facebook for Developers](https://developers.facebook.com/)
 
-### 需要使用的工具：
--   Python 3.6 (可在這[下載](https://www.python.org/downloads/))
--   Pip (可在這[下載](https://pypi.python.org/pypi/pip))
+### Heroku Setup
+1. Creat a New APP
+Click "New" bottom in the top right corner, and click "Creat new app".
+![](https://i.imgur.com/2OuOW3E.png)
+<br />
+Name the app and click "Create app"
+![](https://i.imgur.com/egkRrXw.png)
 
-
-### 在Mac Os 安裝 Virtualenv(虛擬環境)
-可以減少不同版本套件載再一起而造成程式開發混淆。
-
-1. 建立虛擬環境（指令會建立資料夾，並在之中加入必要程式＆資料檔案）
+2. Deploy a Flask app on Heroku
+Need **three specific files:**
+- requirements.txt
 ```
-//python3
-$ virtualenv -p python3 FbBot
-```
-2. 啟用虛擬環境（切換到該資料夾中）
-```
-$ cd FbBot
-$ source bin/activate
-
-//如果要離開虛擬環境
-//$ deactivate
-```
-
-3. Clone git repository
-```
-$ git clone https://github.com/monica-shiao/FBBot-Python.git
-
-$ cd FBBot-Python
-
-//安裝所需的依賴包
-$ pip install -r requirements.txt
+git+https://github.com/TheoKlein/PyMessager@master#egg=pymessager
+flask
+wit
+gunicorn==19.6.0
 ```
 
----
-### 在fb上製作你的機器人
-https://developers.facebook.com/
+- Procfile
+`web: gunicorn app:app --log-file=-`
 
-可視以下完整的教程製作。
-補充：
+- runtime.txt**
+`python-3.6.4`
 
-#### Step1. 產生粉絲專頁存取權杖
-在facebook for developer中新增應用程式完，主畫面側邊欄->產品->Mesenger->設定中，產生粉絲專頁存取權杖
 
----
-### 主機 - Ngrok (簡單讓外網連到自己的api)
+3. Use Heroku CLI
+This page is in Deploy.
+![](https://i.imgur.com/mk3RQJ1.png)
 
-未有ngrok，可在[此處](https://gist.github.com/jwebcat/ecaac7bc7ee26e01cd4a)的說明進行操作下載。
+### Set Environment Variables in Heroku
+- Heroku: Settings -> Config Vars
+![](https://i.imgur.com/J7tOOIf.png)
 
-#### Step2. 編寫 app.py 中的 ACCESS_TOKEN / VERIFY_TOKEN
-- ACCESS_TOKEN：填入剛剛產生的粉絲專頁存取權杖
-- VERIFY_TOKEN：隨意填寫
+- In Code
+```python = 1
+import os
 
-#### Step3. 執行rgrok
+ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
+
+VERIFY_TOKEN = os.getenv('VERIFY_TOKEN')
+
+WIT_ACCESS_TOKEN = os.getenv('WIT_ACCESS_TOKEN')
+
 ```
-//先執行 app.py
-$ python3 app.py
-```
-
-應會產生：`* Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)`
-
-再來，打開一個新的terminal
-```
-//5000 可以依 port的不同更改
-$ ngrok http 5000
-```
-
----
-#### Step4. 設定 webhooks
-回到Step1的設定頁，設定 webhooks
-- Callback Url: 填入剛剛ngrok 產生 https的那串網址。
-- Verify Token: 填入剛剛在app.py中填寫的 VERIFY_TOKEN字串
-- 選擇活動（至少要有）：
-    - check the messages
-    - messaging_postbacks
-    - message_deliveries
-    - messaging_pre_checkouts boxes.
-- 訂閱粉絲專頁
-
----
-### 測試～～～～完成～～～～
-
-詳細操作步驟可見以下的完整教程。
-
 
 ### 參考資料
-[完整教程](https://www.twilio.com/blog/2017/12/facebook-messenger-bot-python.html)
+[Tutorial](https://www.twilio.com/blog/2018/02/facebook-messenger-bot-heroku-python-flask.html)
 
 
 

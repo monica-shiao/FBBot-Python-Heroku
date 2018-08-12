@@ -1,4 +1,4 @@
-flask==0.12.2
-apiai
-gunicorn==19.6.0
 git+https://github.com/TheoKlein/PyMessager@master#egg=pymessager
+flask
+wit
+gunicorn==19.6.0
