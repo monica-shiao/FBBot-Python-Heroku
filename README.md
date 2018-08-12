@@ -53,7 +53,7 @@ WIT_ACCESS_TOKEN = os.getenv('WIT_ACCESS_TOKEN')
 
 ```
 
-### 參考資料
+### Reference
 [Tutorial](https://www.twilio.com/blog/2018/02/facebook-messenger-bot-heroku-python-flask.html)
 
 
