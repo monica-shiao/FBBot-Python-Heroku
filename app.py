@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''
+''' 
     Events:
     messages,
     messaging_postbacks,
@@ -40,7 +40,6 @@ def fb_receive_message():
     # Message event
     if 'message' in messaging:
         message = messaging['message']
-        print(message)
         
         # Start a thread here
         start_new_thread(mesgHandler, (client, sender_id, message))
@@ -48,19 +47,16 @@ def fb_receive_message():
     # Postback massage
     elif 'postback' in messaging:
         postback = messaging['postback']
+        pb_title = postback['title']
 
-        if '房屋詳細資料' in postback['title']:
+        if '房屋詳細資料' in pb_title:
             detail_query = createDetail()
             detail_query['id'] = postback['payload']
             displayDetail(client, sender_id, detail_query)
 
-        elif '新增我的最愛' or '從我的最愛刪除' in postback['title']:
-            
-            if '新增我的最愛' in postback['title']:
-                change_type = 'add'
-            else:
-                change_type = 'delete'
-            
+        elif '新增我的最愛' or '從我的最愛刪除' in pb_title:
+            change_type = 'add' if pb_title=='新增我的最愛' else 'delete'
+
             house_id = postback['payload']
             changefavorate(change_type, sender_id, house_id)
 
@@ -71,7 +67,7 @@ def fb_receive_message():
 
 def mesgHandler(client, sender_id, message):
     client.typing(sender_id, on=True)
-    response_message = greeting_ans[randint(0,len(greeting_ans)-1)]
+    response_message = randomAnswer(greeting_ans)
 
     rec_query = createRecommend()
     
@@ -79,7 +75,6 @@ def mesgHandler(client, sender_id, message):
     if 'text' in message:
         text = message['text']
         resp = wit_response(text)
-        print(resp)
         
         if 'entities' in resp:
             entities = resp['entities']

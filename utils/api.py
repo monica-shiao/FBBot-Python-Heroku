@@ -114,12 +114,7 @@ def displayHouse(client, sender_id, rec_query):
     res = requests.post(recommend, data=rec_query)
     response_data = res.json()
 
-    if rec_query['type'] == 'sale':
-        response_message = sale_ans[randint(0,len(sale_ans)-1)]
-        
-    else:
-        response_message = rent_ans[randint(0,len(rent_ans)-1)]
-    
+    response_message = randomAnswer(sale_ans) if rec_query['type'] == 'sale' else randomAnswer(rent_ans)
 
     # Get House's result is not empty
     if (response_data['_status'] == 'OK') and (len(response_data['result']) > 0):
@@ -198,28 +193,35 @@ def displayFavorate(client, sender_id, fav_query):
     fav_query['userid'] = sender_id
     res = requests.post(favorite, data=fav_query)
     response_data = res.json()
-    response_message = "這是您的最愛"
-    
+    response_message = ""
 
     # Get House's result is not empty
     if (response_data['_status'] == 'OK') and (len(response_data['result']) > 0):
         
         results = response_data['result']
-        # Show the template
-        project_list = []
-        for cnt in range(0,5):
+        
+        # project_list[0] is rent, project_list[1] is sale
+        project_list=[[],[]]
+        for cnt in range(0,10):
             house_id = str(results[cnt]['house_id'])
             title = results[cnt]['title']
             address = results[cnt]['address']
-            
-            project_list.append(GenericElement(title, address, "http://g.udn.com.tw/upfiles/B_AD/ady1007/PSN_PHOTO/887/f_9359887_1.jpg",
-                                [ActionButton(ButtonType.POSTBACK,"房屋詳細資料",payload=house_id),
-                                ActionButton(ButtonType.POSTBACK,"從我的最愛刪除",payload=house_id)]))
+
+            p_list = project_list[0] if results[cnt]['type'] == 'rent' else project_list[1]
+            p_list.append(GenericElement(title, address, "http://g.udn.com.tw/upfiles/B_AD/ady1007/PSN_PHOTO/887/f_9359887_1.jpg",
+                            [ActionButton(ButtonType.POSTBACK,"房屋詳細資料",payload=house_id),
+                            ActionButton(ButtonType.POSTBACK,"從我的最愛刪除",payload=house_id)]))
             
             if cnt == len(results)-1:
                 break
 
-        client.send_generic(sender_id, project_list)
+        if(len(project_list[0]) > 0):
+            client.send_generic(sender_id, project_list[0])
+            client.send_text(sender_id, "上面是您加入我的最愛中的租屋。")
+
+        if(len(project_list[1]) > 0):
+            client.send_generic(sender_id, project_list[1])
+            client.send_text(sender_id, "這些是在我的最愛中，您可能有意願購買的房子")
 
     else:
         response_message = "沒有我的最愛喔～"
@@ -230,16 +232,9 @@ def changefavorate(change_type, sender_id, house_id):
     CHANGE_LOVE_QUERY['userid'] = sender_id
     CHANGE_LOVE_QUERY['house_id'] = house_id
 
-    if change_type == 'add':
-        res = requests.post(addfavorite, data=CHANGE_LOVE_QUERY)
-    else: 
-        res = requests.post(delfavorite, data=CHANGE_LOVE_QUERY)
+    res = requests.post(addfavorite if change_type == 'add' else delfavorite, data=CHANGE_LOVE_QUERY)
 
     response_data = res.json()
     print(str(response_data))
 
     return 
-
-
-
-

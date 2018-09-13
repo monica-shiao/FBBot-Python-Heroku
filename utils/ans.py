@@ -20,6 +20,9 @@ rent_ans=[
 	'租房這些都不錯喔！ 慢慢看。'
 ]
 
+def randomAnswer(f_name):
+	return f_name[randint(0,len(f_name)-1)]
+
 def star(num):
     message=''
     for n in range(0,5):
@@ -28,3 +31,10 @@ def star(num):
         else:
             message += '☆'
     return message
+
+
+
+
+
+
+
