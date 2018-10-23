@@ -53,6 +53,16 @@ WIT_ACCESS_TOKEN = os.getenv('WIT_ACCESS_TOKEN')
 
 ```
 
+### Deploy
+If you already connected your Heroku Project to GitHub
+
+1. Push code to GitHub
+`git push origin master`
+
+2. Heroku will build the project automatically.
+
+
+
 ### Reference
 [Tutorial](https://www.twilio.com/blog/2018/02/facebook-messenger-bot-heroku-python-flask.html)
 
