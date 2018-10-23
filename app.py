@@ -87,6 +87,26 @@ def mesgHandler(client, sender_id, message):
                 rec_query['type'] = 'rent'
                 response_message = "您想租哪裡的房子呢？"
 
+            # Set budget, unit is 萬元
+            if "amount_of_money" in intent_list:
+                money = intent_list["amount_of_money"]
+
+                # Interval
+                if money[0]["type"] == "interval":
+
+                    if "to" in money[0]: # Max
+                        rec_query["maxBuy"] = str(money[0]["to"]["value"])
+                        rec_query["maxRent"] = str(money[0]["to"]["value"])
+
+                    if "from" in money[0]: # Min
+                        rec_query["minBuy"] = str(money[0]["from"]["value"])
+                        rec_query["minRent"] = str(money[0]["from"]["value"])
+
+                # No interval, set actual min?
+                elif money[0]["type"] == "value":
+                    rec_query["minBuy"] = str(money[0]["value"])
+                    rec_query["minRent"] = str(money[0]["value"])
+
             if 'city' in entities:
                 city = entities['city'][0]['value']
 
