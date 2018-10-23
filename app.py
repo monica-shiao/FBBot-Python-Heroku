@@ -88,8 +88,8 @@ def mesgHandler(client, sender_id, message):
                 response_message = "您想租哪裡的房子呢？"
 
             # Set budget, unit is 萬元
-            if "amount_of_money" in intent_list:
-                money = intent_list["amount_of_money"]
+            if "amount_of_money" in entities:
+                money = entities["amount_of_money"]
 
                 # Interval
                 if money[0]["type"] == "interval":
